@@ -1,0 +1,126 @@
+/* ===== OVERLAY FADE ===== */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+  z-index: 999;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== CARD POP ===== */
+.auth-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  width: 360px;
+  animation: pop 0.25s ease;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.92) translateY(25px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===== INPUT ===== */
+.auth-card input {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  transition: 0.2s;
+}
+
+.auth-card input:focus {
+  border-color: #6366f1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+/* ===== BUTTON ===== */
+.register {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  color: white;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99,102,241,0.4);
+}
+
+/* ===== SECOND BUTTON ===== */
+.google {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #f1f5f9;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.google:hover {
+  background: #e2e8f0;
+}
+
+/* ===== CLOSE BTN ===== */
+.close-btn {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  border-radius: 8px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+/* ===== ERROR SHAKE ===== */
+.shake {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.auth-error {
+  color: red;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.or {
+  text-align: center;
+  margin-top: 10px;
+  color: #666;
+}
