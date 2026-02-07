@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Intro from "./pages/Intro";
 import Notes from "./pages/Notes";
-import Quiz from "./pages/Quiz";
+import Quiz from "./pages/Quiz.jzx";
 import QuizResult from "./pages/QuizResult";
 import Interview from "./pages/Interview";
 
