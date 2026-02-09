@@ -15,6 +15,7 @@
     "openai": "^6.18.0"
   },
   "devDependencies": {
-    "modem": "^1.0.3"
+    "modem": "^1.0.3",
+    "nodemon": "^3.1.11"
   }
 }

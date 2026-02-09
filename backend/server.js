@@ -5,20 +5,20 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 
-// ✅ Use ONE naming style consistently
-import authRoutes from "./Routes/authRoutes.js";
-import aiRoutes from "./Routes/aiRoutes.js";
-import interviewRoutes from "./Routes/interviewRoutes.js";
+// ✅ keep folder name lowercase: routes
+import authRoutes from "./routes/authRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* ================= MIDDLEWARE ================= */
 
-// 🔐 CORS – allow frontend only
+// ✅ CORS – local + production safe
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -27,10 +27,12 @@ app.use(express.json());
 
 /* ================= ROUTES ================= */
 
+// 🔍 Health check (VERY IMPORTANT for Render)
 app.get("/", (req, res) => {
-  res.send("SkillPrep API running");
+  res.status(200).send("SkillPrep API running");
 });
 
+// 🔐 API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/interview", interviewRoutes);
@@ -39,12 +41,13 @@ app.use("/api/interview", interviewRoutes);
 
 const startServer = async () => {
   try {
-    await connectDB(); // ✅ wait for DB
+    await connectDB(); // ✅ wait until MongoDB connects
+
     app.listen(PORT, () => {
       console.log(`🚀 Backend running on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Failed to start server:", err.message);
+    console.error("❌ Failed to start server:", err);
     process.exit(1);
   }
 };
