@@ -17,7 +17,7 @@ export default function Profile() {
         return;
       }
 
-      const res = await fetch("http://localhost:5000/api/ai/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ai/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

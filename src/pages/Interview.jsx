@@ -11,7 +11,7 @@ export default function Interview() {
   const startInterview = async () => {
     if (!role) return alert("Enter role");
 
-    const res = await fetch("http://localhost:5000/api/ai/interview-questions", {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ai/interview-questions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role }),

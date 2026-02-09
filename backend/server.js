@@ -18,7 +18,11 @@ const PORT = process.env.PORT || 5000;
 // ✅ CORS – local + production safe
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://skillprep-ai-1.onrender.com",
+      process.env.CLIENT_URL,
+    ].filter(Boolean),
     credentials: true,
   })
 );
