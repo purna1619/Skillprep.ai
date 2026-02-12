@@ -891,6 +891,50 @@ body {
   font-weight: bold;
 }
 
+/* ================= VOICE SELECTION ================= */
+.voice-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.voice-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.voice-btn.active {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.voice-indicator {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+
 /* ================= INTERVIEW SETUP UI ================= */
 .interview-setup-grid {
   display: flex;
