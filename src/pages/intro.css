@@ -890,3 +890,70 @@ body {
   left: 0;
   font-weight: bold;
 }
+
+/* ================= INTERVIEW SETUP UI ================= */
+.interview-setup-grid {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.role-selector {
+  flex: 3;
+}
+
+.role-input {
+  padding: 16px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.role-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.resume-upload-section {
+  flex: 2;
+}
+
+.upload-resume-btn {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.upload-resume-btn:hover {
+  border-color: #6366f1;
+  background: #f1f5f9;
+  color: #6366f1;
+}
+
+.upload-resume-btn.success {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #16a34a;
+  border-style: solid;
+}
+
+@media (max-width: 600px) {
+  .interview-setup-grid {
+    flex-direction: column;
+  }
+}
