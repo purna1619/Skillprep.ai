@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import OpenAI from "openai";
 import multer from "multer";
-import pdf from "pdf-parse";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pdf = require("pdf-parse");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -122,10 +124,13 @@ router.post("/upload-resume", upload.single("resume"), async (req, res) => {
 
   try {
     const data = await pdf(req.file.buffer);
+    if (!data || !data.text) {
+      throw new Error("PDF parsing returned empty content");
+    }
     res.json({ text: data.text });
   } catch (err) {
     console.error("PDF Parsing Error:", err);
-    res.status(500).json({ message: "Failed to parse resume" });
+    res.status(500).json({ message: "Failed to parse resume: " + err.message });
   }
 });
 
@@ -158,7 +163,7 @@ router.post("/interview-chat", async (req, res) => {
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Faster and efficient
+      model: "gpt-3.5-turbo", // Reverting to gpt-3.5-turbo for stability first, will optimize later
       messages,
       max_tokens: 150,
       temperature: 0.7,
@@ -169,7 +174,7 @@ router.post("/interview-chat", async (req, res) => {
 
   } catch (err) {
     console.error("OpenAI Error:", err);
-    res.status(500).json({ message: "Failed to generate response" });
+    res.status(500).json({ message: "Failed to generate response: " + err.message });
   }
 });
 
