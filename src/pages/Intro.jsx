@@ -36,7 +36,7 @@ export default function Intro() {
         <ul className="nav-links">
           <li onClick={() => scrollToSection("about")}>About</li>
           <li onClick={() => scrollToSection("features")}>Features</li>
-          <li className="contact-item">
+          <li className="contact-item" onClick={() => scrollToSection("contact")}>
             Contact
             <div className="contact-tooltip">
               <p><strong>Poorna Chandra</strong></p>
@@ -216,6 +216,32 @@ export default function Intro() {
           </p>
         </motion.div>
       </section>
+
+      {/* ================= CONTACT / FOOTER SECTION ================= */}
+      <footer id="contact" className="footer-section">
+        <div className="footer-content">
+          <motion.div
+            className="footer-logo"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+          >
+            Sk<span>.</span>
+          </motion.div>
+
+          <div className="footer-info">
+            <h3>Get in Touch</h3>
+            <p>Ready to sharpen your skills? Contact us for any queries or feedback.</p>
+            <div className="contact-details">
+              <p>📧 purnachandra1619@gmail.com</p>
+              <p>📍 Hyderabad, India</p>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <p>&copy; {new Date().getFullYear()} SkillPrep AI. Built by Poorna Chandra.</p>
+          </div>
+        </div>
+      </footer>
 
       {/* AUTH MODAL */}
       {showAuth && <AuthModal close={() => setShowAuth(false)} />}
