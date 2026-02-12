@@ -134,7 +134,7 @@ router.post("/upload-resume", upload.single("resume"), async (req, res) => {
   }
 });
 
-/* ================= INTERVIEW CHAT (REAL-TIME) ================= */
+/* ================= INTERVIEW CHAT (REAL-TIME - STREAMING) ================= */
 router.post("/interview-chat", async (req, res) => {
   if (!process.env.OPENAI_API_KEY) {
     return res.status(500).json({ message: "OpenAI API Key is missing on server" });
@@ -147,9 +147,12 @@ router.post("/interview-chat", async (req, res) => {
     return res.status(400).json({ message: "Role and history required" });
   }
 
+  // Truncate resume text if too long to save tokens and speed up
+  const truncatedResume = resumeText ? resumeText.slice(0, 2000) : "";
+
   try {
     const systemPrompt = `You are a professional technical interviewer for a ${role} position. 
-    ${resumeText ? `Use the following candidate resume for context but do not mention you have it explicitly: \n${resumeText}` : ""}
+    ${truncatedResume ? `Use the following candidate resume for context but do not mention you have it explicitly: \n${truncatedResume}` : ""}
     Assess the candidate's skills by asking one question at a time.
     Keep your questions and feedback extremely concise (under 20 words) for rapid response.
     Be encouraging but professional.`;
@@ -162,30 +165,45 @@ router.post("/interview-chat", async (req, res) => {
       })),
     ];
 
-    let completion;
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let stream;
     try {
-      completion = await openai.chat.completions.create({
+      stream = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages,
-        max_tokens: 100,
+        max_tokens: 150,
         temperature: 0.7,
+        stream: true,
       });
     } catch (e) {
       console.log("gpt-4o-mini failed, falling back to gpt-3.5-turbo");
-      completion = await openai.chat.completions.create({
+      stream = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages,
-        max_tokens: 100,
+        max_tokens: 150,
         temperature: 0.7,
+        stream: true,
       });
     }
 
-    const reply = completion.choices[0].message.content;
-    res.json({ reply });
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || "";
+      if (content) {
+        res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+      }
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
 
   } catch (err) {
-    console.error("OpenAI Error:", err);
-    res.status(500).json({ message: "Failed to generate response: " + err.message });
+    console.error("OpenAI Streaming Error:", err);
+    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+    res.end();
   }
 });
 
