@@ -16,6 +16,8 @@ export default function Interview() {
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeText, setResumeText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -34,6 +36,29 @@ export default function Interview() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Load voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        // Find 1 male and 2 female-ish voices
+        const male = voices.find(v => v.name.includes("David") || v.name.includes("Male") || v.name.includes("Google US English") && !v.name.includes("Female")) || voices[0];
+        const female1 = voices.find(v => v.name.includes("Zira") || v.name.includes("Female") || v.name.includes("Google UK English Female")) || voices[1] || voices[0];
+        const female2 = voices.find(v => (v.name.includes("Samantha") || v.name.includes("Mary") || v.name.includes("Google US English")) && v !== female1) || voices[2] || voices[0];
+
+        setAvailableVoices([
+          { label: "Male (Professional)", voice: male },
+          { label: "Female (Clear)", voice: female1 },
+          { label: "Female (Soft)", voice: female2 }
+        ]);
+        setSelectedVoice(female1); // Default to female
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
 
   // Speech to Text
   const startListening = () => {
@@ -62,6 +87,9 @@ export default function Interview() {
   const speak = (text) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    if (selectedVoice?.voice) {
+      utterance.voice = selectedVoice.voice;
+    }
     utterance.rate = 1;
     window.speechSynthesis.speak(utterance);
   };
@@ -266,6 +294,21 @@ export default function Interview() {
               </div>
             </div>
 
+            <div className="voice-selector-setup" style={{ marginTop: '15px' }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '8px', color: '#64748b' }}>Select AI Voice:</p>
+              <div className="voice-options">
+                {availableVoices.map((v, i) => (
+                  <button
+                    key={i}
+                    className={`voice-btn ${selectedVoice?.label === v.label ? 'active' : ''}`}
+                    onClick={() => setSelectedVoice(v)}
+                  >
+                    {v.label.includes("Male") ? "👨" : "👩"} {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               className="get-started"
               style={{ marginTop: "24px", width: "100%" }}
@@ -282,7 +325,12 @@ export default function Interview() {
             animate={{ opacity: 1 }}
           >
             <div className="chat-header">
-              <h3>{role} Interview</h3>
+              <div className="header-info">
+                <h3>{role} Interview</h3>
+                <div className="voice-indicator">
+                  Voice: {selectedVoice?.label.includes("Male") ? "👨" : "👩"} {selectedVoice?.label}
+                </div>
+              </div>
               <button
                 className="end-btn"
                 onClick={endInterview}
