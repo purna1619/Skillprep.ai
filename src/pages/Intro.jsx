@@ -230,7 +230,7 @@ export default function Intro() {
             <div className="contact-details">
               <a href="mailto:purnachandra1619@gmail.com" className="contact-link">📧 purnachandra1619@gmail.com</a>
               <a
-                href="https://github.com/purna1619"
+                href="https://github.com/PoornaChandra1619"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="github-link"
