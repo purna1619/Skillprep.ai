@@ -10,6 +10,9 @@ export default function Interview() {
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [inputText, setInputText] = useState("");
+  const [review, setReview] = useState(null);
+  const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Scroll to bottom on new message
@@ -59,10 +62,12 @@ export default function Interview() {
   };
 
   const sendMessage = async (text) => {
-    if (!text) return;
+    const messageText = text || inputText;
+    if (!messageText) return;
 
-    const newMessages = [...messages, { sender: "user", text }];
+    const newMessages = [...messages, { sender: "user", text: messageText }];
     setMessages(newMessages);
+    setInputText("");
     setLoading(true);
 
     try {
@@ -86,6 +91,81 @@ export default function Interview() {
     }
   };
 
+  const endInterview = async () => {
+    if (messages.length < 2) {
+      navigate("/");
+      return;
+    }
+
+    setIsGeneratingReview(true);
+    window.speechSynthesis.cancel();
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ai/get-interview-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, history: messages }),
+      });
+
+      const data = await res.json();
+      setReview(data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate review");
+      navigate("/");
+    } finally {
+      setIsGeneratingReview(false);
+    }
+  };
+
+  if (review) {
+    return (
+      <div className="colorlib-page">
+        <div className="profile-container" style={{ padding: '100px 8%' }}>
+          <motion.div
+            className="glass-card"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <h2 style={{ fontSize: '2.4rem', marginBottom: '20px' }}>Interview Review 📊</h2>
+
+            <div className="stats-grid" style={{ marginBottom: '30px' }}>
+              <div className="stat-item">
+                <span className="stat-value">{review.overallScore}%</span>
+                <span className="stat-label">Communication Score</span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>{review.summary}</p>
+
+            <div className="review-sections" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'left' }}>
+              <div className="glass-card" style={{ background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                <h4 style={{ color: '#ef4444', marginBottom: '15px' }}>Mistakes</h4>
+                <ul>
+                  {review.mistakes.map((m, i) => <li key={i}>{m}</li>)}
+                </ul>
+              </div>
+              <div className="glass-card" style={{ background: 'rgba(34, 211, 238, 0.1)', borderColor: 'rgba(34, 211, 238, 0.2)' }}>
+                <h4 style={{ color: '#22d3ee', marginBottom: '15px' }}>Improvements</h4>
+                <ul>
+                  {review.improvements.map((m, i) => <li key={i}>{m}</li>)}
+                </ul>
+              </div>
+            </div>
+
+            <button
+              className="get-started"
+              style={{ marginTop: '40px' }}
+              onClick={() => navigate("/")}
+            >
+              Done
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="colorlib-page">
       <div className="hero" style={{ justifyContent: "center", alignItems: "flex-start", paddingTop: "100px" }}>
@@ -98,10 +178,10 @@ export default function Interview() {
             animate={{ opacity: 1, y: 0 }}
           >
             <h1>AI Interviewer 🎤</h1>
-            <p>Enter your target role to begin a real-time voice interview.</p>
+            <p>Enter your target role to begin a voice or text interview.</p>
 
             <input
-              placeholder="e.g. Frontend Developer / Data Scientist"
+              placeholder="e.g. Frontend Developer"
               value={role}
               onChange={(e) => setRole(e.target.value)}
               style={{
@@ -124,18 +204,19 @@ export default function Interview() {
           </motion.div>
         ) : (
           <motion.div
-            className="chat-container"
+            className="chat-container interview-mode"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
             <div className="chat-header">
-              <h3>Creating {role} Interview</h3>
+              <h3>{role} Interview</h3>
               <button
                 className="close-btn"
-                style={{ position: 'static', background: '#ff4d4d' }}
-                onClick={() => navigate("/")}
+                style={{ position: 'static', background: '#ef4444' }}
+                onClick={endInterview}
+                disabled={isGeneratingReview}
               >
-                End
+                {isGeneratingReview ? "Generating Review..." : "End Interview"}
               </button>
             </div>
 
@@ -149,12 +230,28 @@ export default function Interview() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="chat-input-area">
+            <div className="chat-input-area hybrid">
               <button
                 className={`mic-btn ${isListening ? "listening" : ""}`}
                 onClick={startListening}
+                title="Voice Input"
               >
-                {isListening ? "Listening..." : "🎤 Tap to Speak"}
+                🎤
+              </button>
+
+              <input
+                placeholder="Type your answer here..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              />
+
+              <button
+                className="send-btn"
+                onClick={() => sendMessage()}
+                disabled={!inputText.trim()}
+              >
+                ➔
               </button>
             </div>
           </motion.div>

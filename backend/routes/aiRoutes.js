@@ -203,3 +203,46 @@ router.post("/interview-questions", (req, res) => {
   res.json(questions);
 });
 
+/* ================= GET INTERVIEW REVIEW ================= */
+router.post("/get-interview-review", async (req, res) => {
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ message: "OpenAI API Key is missing" });
+  }
+
+  const { history, role } = req.body;
+
+  if (!history || history.length === 0) {
+    return res.status(400).json({ message: "No history to review" });
+  }
+
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  try {
+    const prompt = `You are an expert technical interviewer. Review the following interview transcript for a ${role} position and provide a constructive summary.
+    
+    Transcript:
+    ${history.map(m => `${m.sender.toUpperCase()}: ${m.text}`).join('\n')}
+    
+    Provide your response in JSON format (strictly JSON) with the following structure:
+    {
+      "mistakes": ["List specific technical or communication mistakes"],
+      "improvements": ["List actionable advice for improvement"],
+      "overallScore": 85,
+      "summary": "Short overall feedback summary"
+    }`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "system", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const review = JSON.parse(completion.choices[0].message.content);
+    res.json(review);
+
+  } catch (err) {
+    console.error("Review Generation Error:", err);
+    res.status(500).json({ message: "Failed to generate review" });
+  }
+});
+

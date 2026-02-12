@@ -791,3 +791,81 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= HYBRID CHAT ================= */
+.chat-container.interview-mode {
+  max-width: 900px;
+}
+
+.chat-input-area.hybrid {
+  gap: 12px;
+  background: #f8fafc;
+  padding: 15px 25px;
+}
+
+.chat-input-area.hybrid input {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 30px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.chat-input-area.hybrid input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.mic-btn.hybrid {
+  padding: 12px;
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+}
+
+.send-btn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #4f46e5;
+  transform: scale(1.05);
+}
+
+.send-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.review-sections ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.review-sections li {
+  margin-bottom: 10px;
+  padding-left: 20px;
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.review-sections li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
