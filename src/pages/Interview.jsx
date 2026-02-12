@@ -146,21 +146,59 @@ export default function Interview() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ai/interview-chat`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/ai/interview-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role, history: newMessages, resumeText }),
       });
 
-      const data = await res.json();
-      const aiResponse = data.reply;
+      if (!response.ok) throw new Error("Failed to connect to AI");
 
-      setMessages((prev) => [...prev, { sender: "ai", text: aiResponse }]);
-      speak(aiResponse);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiFullText = "";
+
+      // Add an initial empty AI message that we will update
+      setMessages((prev) => [...prev, { sender: "ai", text: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.replace("data: ", "");
+            if (dataStr === "[DONE]") {
+              // Finish up
+              speak(aiFullText);
+              break;
+            }
+
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.error) throw new Error(data.error);
+              if (data.text) {
+                aiFullText += data.text;
+                // Update the last message (the AI's message) in real-time
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1].text = aiFullText;
+                  return updated;
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing stream chunk", e);
+            }
+          }
+        }
+      }
 
     } catch (err) {
       console.error(err);
-      alert("Failed to get AI response");
+      alert(`Failed to get AI response: ${err.message}`);
     } finally {
       setLoading(false);
     }
