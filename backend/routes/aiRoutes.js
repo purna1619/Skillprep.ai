@@ -151,7 +151,7 @@ router.post("/interview-chat", async (req, res) => {
     const systemPrompt = `You are a professional technical interviewer for a ${role} position. 
     ${resumeText ? `Use the following candidate resume for context but do not mention you have it explicitly: \n${resumeText}` : ""}
     Assess the candidate's skills by asking one question at a time.
-    Keep your questions and feedback extremely concise (under 25 words) for rapid response.
+    Keep your questions and feedback extremely concise (under 20 words) for rapid response.
     Be encouraging but professional.`;
 
     const messages = [
@@ -162,12 +162,23 @@ router.post("/interview-chat", async (req, res) => {
       })),
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Reverting to gpt-3.5-turbo for stability first, will optimize later
-      messages,
-      max_tokens: 150,
-      temperature: 0.7,
-    });
+    let completion;
+    try {
+      completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages,
+        max_tokens: 100,
+        temperature: 0.7,
+      });
+    } catch (e) {
+      console.log("gpt-4o-mini failed, falling back to gpt-3.5-turbo");
+      completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages,
+        max_tokens: 100,
+        temperature: 0.7,
+      });
+    }
 
     const reply = completion.choices[0].message.content;
     res.json({ reply });

@@ -87,13 +87,12 @@ export default function Interview() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || "Unknown error");
 
       setResumeText(data.text);
-      // alert("Resume uploaded and parsed successfully!");
     } catch (err) {
       console.error(err);
-      alert("Failed to parse resume. You can still start the interview manually.");
+      alert(`Failed to parse resume: ${err.message}. You can still start the interview manually.`);
     } finally {
       setIsUploading(false);
     }
