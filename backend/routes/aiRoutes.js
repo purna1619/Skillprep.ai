@@ -1,6 +1,11 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import OpenAI from "openai";
+import multer from "multer";
+import pdf from "pdf-parse";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -109,21 +114,29 @@ router.get("/profile", authMiddleware, async (req, res) => {
 });
 
 export default router;
-/* ================= INTERVIEW CHAT (REAL-TIME) ================= */
-import OpenAI from "openai";
+/* ================= UPLOAD & PARSE RESUME ================= */
+router.post("/upload-resume", upload.single("resume"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
 
+  try {
+    const data = await pdf(req.file.buffer);
+    res.json({ text: data.text });
+  } catch (err) {
+    console.error("PDF Parsing Error:", err);
+    res.status(500).json({ message: "Failed to parse resume" });
+  }
+});
+
+/* ================= INTERVIEW CHAT (REAL-TIME) ================= */
 router.post("/interview-chat", async (req, res) => {
-  // Check for API key at runtime to prevent startup crash
   if (!process.env.OPENAI_API_KEY) {
-    console.error("Missing OPENAI_API_KEY");
     return res.status(500).json({ message: "OpenAI API Key is missing on server" });
   }
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-  const { role, history } = req.body;
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const { role, history, resumeText } = req.body;
 
   if (!role || !history) {
     return res.status(400).json({ message: "Role and history required" });
@@ -131,8 +144,9 @@ router.post("/interview-chat", async (req, res) => {
 
   try {
     const systemPrompt = `You are a professional technical interviewer for a ${role} position. 
+    ${resumeText ? `Use the following candidate resume for context but do not mention you have it explicitly: \n${resumeText}` : ""}
     Assess the candidate's skills by asking one question at a time.
-    Keep your questions and feedback extremely concise (under 30 words) for rapid response.
+    Keep your questions and feedback extremely concise (under 25 words) for rapid response.
     Be encouraging but professional.`;
 
     const messages = [
@@ -144,8 +158,10 @@ router.post("/interview-chat", async (req, res) => {
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini", // Faster and efficient
       messages,
+      max_tokens: 150,
+      temperature: 0.7,
     });
 
     const reply = completion.choices[0].message.content;

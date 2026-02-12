@@ -13,7 +13,9 @@
     "google-auth-library": "^10.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.22.0",
-    "openai": "^6.18.0"
+    "multer": "^2.0.2",
+    "openai": "^6.18.0",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "modem": "^1.0.3",
