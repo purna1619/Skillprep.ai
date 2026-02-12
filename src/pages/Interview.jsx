@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import "./intro.css";
 
 export default function Interview() {
+  const navigate = useNavigate();
   const [role, setRole] = useState("");
   const [started, setStarted] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -131,7 +133,7 @@ export default function Interview() {
               <button
                 className="close-btn"
                 style={{ position: 'static', background: '#ff4d4d' }}
-                onClick={() => window.location.reload()}
+                onClick={() => navigate("/")}
               >
                 End
               </button>

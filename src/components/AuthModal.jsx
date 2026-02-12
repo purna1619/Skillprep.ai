@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 import "./auth.css";
-import { registerUser, loginUser } from "../services/authService";
+import { registerUser, loginUser, googleLogin } from "../services/authService";
 
 export default function AuthModal({ close }) {
   const [isLogin, setIsLogin] = useState(false);
@@ -74,6 +75,30 @@ export default function AuthModal({ close }) {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await googleLogin(credentialResponse.credential);
+
+      if (!data?.token) {
+        throw new Error(data?.msg || "Google Authentication failed");
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      alert("Login successful 🎉");
+      close();
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Google Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-overlay" onClick={close}>
       <div className="auth-card" onClick={(e) => e.stopPropagation()}>
@@ -87,10 +112,15 @@ export default function AuthModal({ close }) {
         {error && <div className="auth-error">{error}</div>}
 
         <div className="social-login">
-          <button className="google-btn" onClick={() => alert("Google Login needs Cloud Console setup!")}>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20" />
-            Continue with Google
-          </button>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Login Failed")}
+            useOneTap
+            theme="filled_blue"
+            shape="pill"
+            text="continue_with"
+            width="100%"
+          />
         </div>
 
         <div className="divider">

@@ -35,3 +35,20 @@ export const loginUser = async (data) => {
 
   return await res.json();
 };
+
+export const googleLogin = async (idToken) => {
+  const res = await fetch(`${API_URL}/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ idToken }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Google Login failed");
+  }
+
+  return await res.json();
+};
