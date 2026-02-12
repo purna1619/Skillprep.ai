@@ -108,10 +108,15 @@ export default function Interview() {
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to generate review");
+      }
+
       setReview(data);
     } catch (err) {
       console.error(err);
-      alert("Failed to generate review");
+      alert(err.message || "Failed to generate review");
       navigate("/");
     } finally {
       setIsGeneratingReview(false);
@@ -131,24 +136,24 @@ export default function Interview() {
 
             <div className="stats-grid" style={{ marginBottom: '30px' }}>
               <div className="stat-item">
-                <span className="stat-value">{review.overallScore}%</span>
+                <span className="stat-value">{review.overallScore || 0}%</span>
                 <span className="stat-label">Communication Score</span>
               </div>
             </div>
 
-            <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>{review.summary}</p>
+            <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>{review.summary || "No summary available."}</p>
 
             <div className="review-sections" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'left' }}>
               <div className="glass-card" style={{ background: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
                 <h4 style={{ color: '#ef4444', marginBottom: '15px' }}>Mistakes</h4>
                 <ul>
-                  {review.mistakes.map((m, i) => <li key={i}>{m}</li>)}
+                  {review.mistakes?.length > 0 ? review.mistakes.map((m, i) => <li key={i}>{m}</li>) : <li>No notable mistakes.</li>}
                 </ul>
               </div>
               <div className="glass-card" style={{ background: 'rgba(34, 211, 238, 0.1)', borderColor: 'rgba(34, 211, 238, 0.2)' }}>
                 <h4 style={{ color: '#22d3ee', marginBottom: '15px' }}>Improvements</h4>
                 <ul>
-                  {review.improvements.map((m, i) => <li key={i}>{m}</li>)}
+                  {review.improvements?.length > 0 ? review.improvements.map((m, i) => <li key={i}>{m}</li>) : <li>Keep up the good work!</li>}
                 </ul>
               </div>
             </div>
